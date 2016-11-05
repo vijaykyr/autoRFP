@@ -10,5 +10,9 @@ RUN apt-get update && apt-get install -y \
 #Download app code
 RUN git clone https://github.com/vijaykyr/rfi-o-matic.git
 
-#Expose private port inside container (bind to public port N using 'docker run -p N:8081')
-EXPOSE 80
+#Networking settings
+#VM routes requests to port 8080 by default (can change this in app.yaml)
+EXPOSE 8080
+
+#Start web server
+CMD ["node", "express_server.js"]
