@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <body>
+    <div class="container">
+      <form action="/" method="post">
+        <div><textarea name="questions" class="input-block-level" rows="3"></textarea></div>
+        <div><input type="submit" class="btn btn-large btn-primary" value="Get Answer(s)"></div>
+      </form>
+
+      <!-- [START Answers] -->
+      {% for answer in answers %}
+      <div class="row">
+        <blockquote>{{answer}}</blockquote>
+      </div>
+      {% endfor %}
+      <!-- [END Answers] -->
+    </div>
+  </body>
+</html>
+{% endautoescape %}

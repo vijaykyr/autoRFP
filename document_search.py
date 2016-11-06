@@ -12,6 +12,7 @@ from gensim import corpora
 #Define Class Constants
 FILE_NAME = 'RFX01-10172016.csv'
 STEMMER = nltk.stem.snowball.SnowballStemmer("english")
+NUMBER_OF_ANSWERS = 2 #number of answer choices to return
 STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves', u'you', u'your', u'yours',
  u'yourself', u'yourselves', u'he', u'him', u'his', u'himself', u'she', u'her', u'hers', u'herself', u'it', u'its',
  u'itself', u'they', u'them', u'their', u'theirs', u'themselves', u'what', u'which', u'who', u'whom', u'this', u'that',
@@ -27,26 +28,38 @@ STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves'
 
 #Functions
 def normalize(text):
+    if(type(text) == unicode): text = text.encode('ascii','ignore') 
+    #the translate function doesn't work on unicode
     text = unicode(text.lower().translate(None, string.punctuation),errors='replace')
+    #encoding back to unicode for NLTK compatibility
     text = [word for word in text.split() if word not in STOPWORDS]
     text = [STEMMER.stem(word) for word in text]
     return text
 
-def display_sims(sims,number_of_results):
-    #sort results
-    sims = sorted(enumerate(sims), key=lambda item: -item[1])[:number_of_results]
-    
-    #display
-    for sim in sims:
-        print("Similarity Score: {}".format(sim[1]))
-        print(data.loc[sim[0]].to_frame().drop(['id','category']))
-        
-    
+def get_answers(questions):
+  questions_normalized = [normalize(question) for question in questions]
+  questions_bow = [dictionary.doc2bow(question_normalized) for question_normalized in questions_normalized]
+  questions_tfidf = [tfidf[question_bow] for question_bow in questions_bow]
+
+  #ToDo: Test with blank string questions. Do you need to filter them out?
+  i=0
+  answers = []
+  for question_tfidf in questions_tfidf:
+    sims = sorted(enumerate(index_tfidf[question_tfidf]), key=lambda item: -item[1])[:NUMBER_OF_ANSWERS]
+    possible_answers = [(data.loc[sim[0]].get("answer"),sim[1]) for sim in sims]  
+    answers.append((questions[i],possible_answers))
+    i=i+1
+      
+  return answers
+
+#INITIALIZE CLASS
+          
 #Load Q/A data
 data = pd.read_csv(FILE_NAME)
 documents = data['question'].tolist()
 
 print("Data loaded!")
+
 #Normalize
 corpus = [normalize(text) for text in documents]
 
@@ -63,16 +76,3 @@ index_tfidf = similarities.MatrixSimilarity(corpus_tfidf)
 
 print("TFIDF Index created!")
 
-def get_answers(questions):
-  questions_normalized = [normalize(question) for question in questions]
-  questions_bow = [dictionary.doc2bow(question_normalized) for question_normalized in questions_normalized]
-  questions_tfidf = [tfidf[question_bow] for question_bow in questions_bow]
-
-  i=0
-  for question_tfidf in questions_tfidf:
-      print("Input Question: {}".format(questions[i]))
-      display_sims(index_tfidf[question_tfidf],1)
-      i=i+1
-
-#get_answers(["What is your data privacy policy?"])
-#print("done!")
