@@ -1,5 +1,3 @@
 runtime: custom
 vm: true
 service: default
-health_check:
-  enable_health_check: False

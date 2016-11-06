@@ -1,31 +1,31 @@
-// Copyright 2015-2016, Google, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Author: reddyv@
+ * Last Updated: 11-05-2016
+ * Usage: node express_server.js
+ * ToDo:
+ *  1) 
+ *
+*/
 
-// [START app]
-'use strict';
+//Load required modules
+var express = require('express') //npm module: web framework
+var multer = require('multer') //https://www.npmjs.com/package/multer
 
-var express = require('express');
+//Initialize
+var express = express()
+var upload = multer()
 
-var app = express();
+//Define routes
+express.get('/', function (req, res) {
+	res.sendFile(__dirname + '/html/form.html') 
+	//__dirname is a nodejs global representing the current directory
+})
 
-app.get('/', function (req, res) {
-  res.status(200).send('Hello, nodejs!');
-});
+express.post('/', upload.array(), function (req, res) {
+  res.send(req.body.question)
+})
 
-// Start the server
-var server = app.listen(process.env.PORT || '8080', function () {
-  console.log('App listening on port %s', server.address().port);
-  console.log('Press Ctrl+C to quit.');
-});
-// [END app]
+//Start the server
+var server = express.listen('8080', function () {
+  console.log('Server listening on port %s', server.address().port)
+})
