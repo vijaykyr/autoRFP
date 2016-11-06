@@ -66,9 +66,9 @@
       {% endfor %}
       <!-- [END greetings] -->
 
-      <form action="/sign?guestbook_name={{ guestbook_name }}" method="post">
-        <div><textarea name="content" class="input-block-level" rows="3"></textarea></div>
-        <div><input type="submit" class="btn btn-large btn-primary" value="Sign Guestbook"></div>
+      <form action="/question" method="post">
+        <div><textarea name="question" class="input-block-level" rows="3"></textarea></div>
+        <div><input type="submit" class="btn btn-large btn-primary" value="Get Answer"></div>
       </form>
 
       <hr>

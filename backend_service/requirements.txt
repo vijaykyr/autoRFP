@@ -1,0 +1,3 @@
+nltk-3.2.1
+gensim-0.13.3
+pandas-0.19.1
