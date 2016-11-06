@@ -46,6 +46,7 @@ def display_sims(sims,number_of_results):
 data = pd.read_csv(FILE_NAME)
 documents = data['question'].tolist()
 
+print("Data loaded!")
 #Normalize
 corpus = [normalize(text) for text in documents]
 
@@ -60,15 +61,16 @@ corpus_tfidf = tfidf[corpus_bow]
 #Generate similiarity index
 index_tfidf = similarities.MatrixSimilarity(corpus_tfidf)
 
-#Vectorize questions
-questions = ["What is your data privacy policy?"]
-questions_normalized = [normalize(question) for question in questions]
-questions_bow = [dictionary.doc2bow(question_normalized) for question_normalized in questions_normalized]
-questions_tfidf = [tfidf[question_bow] for question_bow in questions_bow]
+def get_answers(questions):
+  questions_normalized = [normalize(question) for question in questions]
+  questions_bow = [dictionary.doc2bow(question_normalized) for question_normalized in questions_normalized]
+  questions_tfidf = [tfidf[question_bow] for question_bow in questions_bow]
 
-i=0
-for question_tfidf in questions_tfidf:
-    print("Input Question: {}".format(questions[i]))
-    display_sims(index_tfidf[question_tfidf],1)
-    i=i+1
-    
+  i=0
+  for question_tfidf in questions_tfidf:
+      print("Input Question: {}".format(questions[i]))
+      display_sims(index_tfidf[question_tfidf],1)
+      i=i+1
+
+#get_answers(["What is your data privacy policy?"])
+#print("done!")

@@ -20,7 +20,7 @@ import urllib
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
-
+from document_search import get_answers
 import jinja2
 import webapp2
 
@@ -83,7 +83,7 @@ class Question(webapp2.RequestHandler):
 
     def post(self):
         question = self.request.get('question')
-        
+        get_answers([question])
         query_params = {'question': question}
         self.redirect('/?' + urllib.urlencode(query_params))
 
@@ -92,4 +92,7 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/question', Question),
 ], debug=True)
+
+#Initialize Questions
+get_answers(["Do you have a privacy policy?"])
 # [END app]
