@@ -11,7 +11,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 class MainPage(webapp2.RequestHandler):
     def get(self):
         template_values = {
-            'answers': ["asdfsda","bbbbbbf"],
+            'answers': [],
         }
         
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -19,10 +19,17 @@ class MainPage(webapp2.RequestHandler):
     
     def post(self):
         questions = self.request.get('questions').splitlines()
-        print(type(questions))
-        print(questions)
-        answers = get_answers(questions)
-        print(answers)
+        #print(type(questions))
+        #print(questions)
+        
+        template_values = {
+            'answers': get_answers(questions),
+        }
+        
+        template = JINJA_ENVIRONMENT.get_template('index.html')
+        self.response.write(template.render(template_values))
+        
+        #print(answers)
         #query_params = {'question': question}
         #self.redirect('/?' + urllib.urlencode(query_params))
 

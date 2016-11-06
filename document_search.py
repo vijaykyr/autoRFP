@@ -37,11 +37,11 @@ def normalize(text):
     return text
 
 def get_answers(questions):
+  questions = filter(None,questions) #remove empty lines
   questions_normalized = [normalize(question) for question in questions]
   questions_bow = [dictionary.doc2bow(question_normalized) for question_normalized in questions_normalized]
   questions_tfidf = [tfidf[question_bow] for question_bow in questions_bow]
 
-  #ToDo: Test with blank string questions. Do you need to filter them out?
   i=0
   answers = []
   for question_tfidf in questions_tfidf:
@@ -54,11 +54,10 @@ def get_answers(questions):
 
 #INITIALIZE CLASS
           
-#Load Q/A data
+#Load data
+#ToDO: Load this from cloud SQL
 data = pd.read_csv(FILE_NAME)
 documents = data['question'].tolist()
-
-print("Data loaded!")
 
 #Normalize
 corpus = [normalize(text) for text in documents]
