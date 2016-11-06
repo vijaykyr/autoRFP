@@ -1,5 +1,5 @@
 runtime: python
 vm: true
-entrypoint: gunicorn -b :$PORT main:app
+entrypoint: gunicorn -b :$PORT front_end:app
 
 
