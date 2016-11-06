@@ -10,9 +10,12 @@ RUN apt-get update && apt-get install -y \
 #Download app code
 RUN git clone https://github.com/vijaykyr/rfi-o-matic.git
 
+#Change working directory
+WORKDIR /rfi-o-matic
+
 #Networking settings
+EXPOSE 8080 
 #VM routes requests to port 8080 by default (can change this in app.yaml)
-EXPOSE 8080
 
 #Start web server
 CMD ["node", "express_server.js"]
