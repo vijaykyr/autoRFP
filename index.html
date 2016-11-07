@@ -47,10 +47,10 @@
         <tr>
 					<td>{{answer.get("question")}}</td>
 					{% for choice in answer.get("answers") %}
-						{% if (choice.get("score") < 0.4) %}
+						{% if (choice.get("score") < 0.3) %}
 							<td align="center">(minimum score not met: {{choice.get("score")}})</td>
 						{% else %}
-							<td>{{choice.get("answer")}}</td>
+							<td>score: {{choice.get("score")}}. {{choice.get("answer")}}</td>
 						{% endif %}						
 					{% endfor %}
 				</tr>
