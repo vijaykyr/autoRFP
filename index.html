@@ -3,27 +3,57 @@
 <html>
 	<head>
 		<style>
-		table {
-			border: 1px solid black;
+		.hiddenChoice {
+			color: #79869b;
+			text-align: center;
+			background-color: yellow;
 		}
+		
+		table {
+		    border-collapse: collapse;
+		    width: 100%;
+				max-width:1200px;
+				min-width: 400px;
+		}
+
+		th, td {
+		    padding: 8px;
+		    text-align: left;
+		    border-bottom: 1px solid #ddd;
+		}
+
+		tr:hover{background-color:#f5f5f5}
+		tr:nth-child(even) {background-color: #f2f2f2}
+		
+
 		</style>
 	</head>
   
 	<body>
       <form action="/" method="post">
-        <textarea name="questions" class="input-block-level" rows="10"></textarea>
+        <textarea name="questions"  rows="10" cols ="100"
+					autofocus 
+					placeholder="Enter question(s). One per line."></textarea>
 				<div>
-        <input type="submit" class="btn btn-large btn-primary" value="Get Answer(s)">
+        <input type="submit" value="Get Answer(s)">
       </form>
 
       <!-- [START Answers] -->
+			<div style="overflow-x:auto;">
 			<table>
+			{% if answers %}
+				<tr>
+					<th>Question</th>
+					<th>Answer 1</th>
+					<th>Answer 2</th>
+				</tr>
+			{% endif %}
       {% for answer in answers %}
         <tr>
 					<td>{{answer.get("question")}}</td>
 					{% for choice in answer.get("answers") %}
 						{% if (choice.get("score") < 0.5) %}
-							<td>Minimum answer score not met</td>
+							<span class="hiddenChoice"><td align="center">(minimum score not met)</td></span>
 						{% else %}
 							<td>{{choice.get("answer")}}</td>
 						{% endif %}						
@@ -32,6 +62,7 @@
 			{% endfor %}
       <!-- [END Answers] -->
 			</table>
+			</div>
   </body>
 </html>
 {% endautoescape %}
