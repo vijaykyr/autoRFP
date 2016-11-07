@@ -26,6 +26,7 @@ class MainPage(webapp2.RequestHandler):
         #print(questions)
         
         template_values = {
+            'questions': self.request.get('questions'),
             'answers': get_answers(questions),
         }
         

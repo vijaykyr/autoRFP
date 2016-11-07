@@ -3,12 +3,6 @@
 <html>
 	<head>
 		<style>
-		.hiddenChoice {
-			color: #79869b;
-			text-align: center;
-			background-color: yellow;
-		}
-		
 		table {
 		    border-collapse: collapse;
 		    width: 100%;
@@ -30,15 +24,16 @@
 	</head>
   
 	<body>
+			<!-- [Questions] -->
       <form action="/" method="post">
         <textarea name="questions"  rows="10" cols ="100"
 					autofocus 
-					placeholder="Enter question(s). One per line."></textarea>
+					placeholder="Enter question(s). One per line.">{{questions}}</textarea>
 				<div>
         <input type="submit" value="Get Answer(s)">
       </form>
 
-      <!-- [START Answers] -->
+      <!-- [Answers] -->
 			<div style="overflow-x:auto;">
 			<table>
 			{% if answers %}
@@ -60,7 +55,6 @@
 					{% endfor %}
 				</tr>
 			{% endfor %}
-      <!-- [END Answers] -->
 			</table>
 			</div>
   </body>
