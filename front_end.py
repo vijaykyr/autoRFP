@@ -2,6 +2,9 @@ import os
 import webapp2
 import jinja2
 from document_search import get_answers
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),

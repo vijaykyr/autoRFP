@@ -2,20 +2,25 @@
 {% autoescape true %}
 <html>
   <body>
-    <div class="container">
       <form action="/" method="post">
-        <div><textarea name="questions" class="input-block-level" rows="10"></textarea></div>
-        <div><input type="submit" class="btn btn-large btn-primary" value="Get Answer(s)"></div>
+        <textarea name="questions" class="input-block-level" rows="10"></textarea>
+				<div>
+        <input type="submit" class="btn btn-large btn-primary" value="Get Answer(s)">
       </form>
 
       <!-- [START Answers] -->
+			<table>
       {% for answer in answers %}
-      <div class="row">
-        <blockquote>{{answer}}</blockquote>
-      </div>
-      {% endfor %}
+        <tr>
+					<td>{{answer.get("question")}}</td>
+					{% for choice in answer.get("answers") %}
+					<td>{{choice.get("answer")}}</td>
+					<td>{{choice.get("score")}}</td>
+					{% endfor %}
+				</tr>
+			{% endfor %}
       <!-- [END Answers] -->
-    </div>
+			</table>
   </body>
 </html>
 {% endautoescape %}
