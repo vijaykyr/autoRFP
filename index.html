@@ -23,15 +23,13 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 		<script>
 			$(function() {
-			    $("td[colspan=3]").find("p").hide();
+			    $(".hidden").hide();
 			    $("table").click(function(event) {
 			        event.stopPropagation();
 			        var $target = $(event.target);
-			        if ( $target.closest("td").attr("colspan") > 1 ) {
-			            $target.slideUp();
-			        } else {
-			            $target.closest("tr").next().find("p").slideToggle();
-			        }                    
+			        if (!$target.closest("tr").hasClass("hidden")) {
+			            $target.closest("tr").next().slideToggle();
+			        }                  
 			    });
 			});
 		</script>
@@ -47,7 +45,7 @@
         <input type="submit" value="Get Answer(s)">
       </form>
 
-      <!-- [Answers] -->
+      <!-- [Main Table] -->
 			<div style="overflow-x:auto;">
 			<table>
 			{% if answers %}
@@ -60,22 +58,27 @@
 					{% endfor %}
 				</tr>
 			{% endif %}
+			
+			<!-- [Answers] -->
       {% for answer in answers %}
         <tr>
 					<td>{{answer.get("question")}}</td>
 					{% for choice in answer.get("answers") %}
 						{% if (choice.get("score") < 0.3) %}
-							<td align="center">(minimum score not met: {{choice.get("score")}})</td>
+							<td align="center">(minimum score not met)</td>
 						{% else %}
-							<td>score: {{choice.get("score")}}. {{choice.get("answer")}}</td>
+							<td>{{choice.get("answer")}}</td>
 						{% endif %}						
 					{% endfor %}
 				</tr>
-				<tr>
-					<td colspan="3"><p>Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah 
-						blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-						 blah blah blah blah blah blah blah blah blah blah blah blah</p>
-					</td>
+				
+				<!-- [Click to Expand Details] -->
+				<tr class="hidden">
+					<td></td>
+					{% for choice in answer.get("answers") %}
+							<td>score: {{choice.get("score")}}</td>
+					{% endfor %}
+				
 				</tr>
 			{% endfor %}
 			</table>
