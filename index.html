@@ -27,8 +27,8 @@
 			    $("table").click(function(event) {
 			        event.stopPropagation();
 			        var $target = $(event.target);
-			        if (!$target.closest("tr").hasClass("hidden")) {
-			            $target.closest("tr").next().slideToggle();
+			        if ($target.closest("tr").hasClass("answer")) {
+			            $target.closest("tr").next().slideToggle(400);
 			        }                  
 			    });
 			});
@@ -61,7 +61,7 @@
 			
 			<!-- [Answers] -->
       {% for answer in answers %}
-        <tr>
+        <tr class="answer">
 					<td>{{answer.get("question")}}</td>
 					{% for choice in answer.get("answers") %}
 						{% if (choice.get("score") < 0.3) %}
@@ -74,11 +74,12 @@
 				
 				<!-- [Click to Expand Details] -->
 				<tr class="hidden">
+					<div class="animate">
 					<td></td>
 					{% for choice in answer.get("answers") %}
 							<td>score: {{choice.get("score")}}</td>
 					{% endfor %}
-				
+					</div>
 				</tr>
 			{% endfor %}
 			</table>
