@@ -16,19 +16,18 @@
 		    border-bottom: 1px solid #ddd;
 		}
 
-		tr:nth-child(odd) {background-color: #f2f2f2}
-		
+		tr:nth-child(4n) {background-color: #f2f2f2}
+		tr:nth-child(4n+1) {background-color: #f2f2f2}
 
 		</style>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 		<script>
 			$(function() {
 			    $(".hidden").hide();
-			    $("table").click(function(event) {
-			        event.stopPropagation();
+			    $("tr").click(function() {
 			        var $target = $(event.target);
 			        if ($target.closest("tr").hasClass("answer")) {
-			            $target.closest("tr").next().slideToggle(400);
+			            $target.closest("tr").next().slideToggle(0);
 			        }                  
 			    });
 			});
@@ -47,7 +46,7 @@
 
       <!-- [Main Table] -->
 			<div style="overflow-x:auto;">
-			<table>
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
 			{% if answers %}
 				{% set count = 0 %}
 				<tr>
@@ -74,10 +73,9 @@
 				
 				<!-- [Click to Expand Details] -->
 				<tr class="hidden">
-					<div class="animate">
-					<td></td>
+					<td><div class="animate"></div></td>
 					{% for choice in answer.get("answers") %}
-							<td>score: {{choice.get("score")}}</td>
+							<td><div class="animate">score: {{choice.get("score")}}</div></td>
 					{% endfor %}
 					</div>
 				</tr>
