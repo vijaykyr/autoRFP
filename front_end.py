@@ -6,6 +6,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+NUMBER_OF_ANSWERS = 2 #number of answer choices to return
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
@@ -27,7 +28,7 @@ class MainPage(webapp2.RequestHandler):
         
         template_values = {
             'questions': self.request.get('questions'),
-            'answers': get_answers(questions),
+            'answers': get_answers(questions,NUMBER_OF_ANSWERS),
         }
         
         template = JINJA_ENVIRONMENT.get_template('index.html')

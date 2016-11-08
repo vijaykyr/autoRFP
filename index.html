@@ -16,11 +16,25 @@
 		    border-bottom: 1px solid #ddd;
 		}
 
-		tr:hover{background-color:#f5f5f5}
-		tr:nth-child(even) {background-color: #f2f2f2}
+		tr:nth-child(odd) {background-color: #f2f2f2}
 		
 
 		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script>
+			$(function() {
+			    $("td[colspan=3]").find("p").hide();
+			    $("table").click(function(event) {
+			        event.stopPropagation();
+			        var $target = $(event.target);
+			        if ( $target.closest("td").attr("colspan") > 1 ) {
+			            $target.slideUp();
+			        } else {
+			            $target.closest("tr").next().find("p").slideToggle();
+			        }                    
+			    });
+			});
+		</script>
 	</head>
   
 	<body>
@@ -37,10 +51,13 @@
 			<div style="overflow-x:auto;">
 			<table>
 			{% if answers %}
+				{% set count = 0 %}
 				<tr>
 					<th>Question</th>
-					<th>Answer 1</th>
-					<th>Answer 2</th>
+					{% for choice in answers[0].get("answers") %}
+						{% set count = count + 1 %}
+						<th>Answer {{count}}</th>
+					{% endfor %}
 				</tr>
 			{% endif %}
       {% for answer in answers %}
@@ -53,6 +70,12 @@
 							<td>score: {{choice.get("score")}}. {{choice.get("answer")}}</td>
 						{% endif %}						
 					{% endfor %}
+				</tr>
+				<tr>
+					<td colspan="3"><p>Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah 
+						blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+						 blah blah blah blah blah blah blah blah blah blah blah blah</p>
+					</td>
 				</tr>
 			{% endfor %}
 			</table>

@@ -12,7 +12,6 @@ from gensim import corpora
 #Define Class Constants
 FILE_NAME = 'RFX01-10172016.csv'
 STEMMER = nltk.stem.snowball.SnowballStemmer("english")
-NUMBER_OF_ANSWERS = 2 #number of answer choices to return
 STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves', u'you', u'your', u'yours',
  u'yourself', u'yourselves', u'he', u'him', u'his', u'himself', u'she', u'her', u'hers', u'herself', u'it', u'its',
  u'itself', u'they', u'them', u'their', u'theirs', u'themselves', u'what', u'which', u'who', u'whom', u'this', u'that',
@@ -36,7 +35,7 @@ def normalize(text):
     text = [STEMMER.stem(word) for word in text]
     return text
 
-def get_answers(questions):
+def get_answers(questions,number_of_answers):
   questions = filter(None,questions) #remove empty lines
   questions_normalized = [normalize(question) for question in questions]
   questions_bow = [dictionary.doc2bow(question_normalized) for question_normalized in questions_normalized]
@@ -46,7 +45,7 @@ def get_answers(questions):
   
   answers = []
   for question_tfidf in questions_tfidf:
-    sims = sorted(enumerate(index_tfidf[question_tfidf]), key=lambda item: -item[1])[:NUMBER_OF_ANSWERS]
+    sims = sorted(enumerate(index_tfidf[question_tfidf]), key=lambda item: -item[1])[:number_of_answers]
     possible_answers = [{"answer":data.loc[sim[0]].get("answer"),"score":round(sim[1],2)} for sim in sims]  
     answers.append({"question":questions[i],"answers":possible_answers})
     i=i+1
