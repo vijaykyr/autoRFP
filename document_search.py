@@ -46,7 +46,7 @@ def get_answers(questions,number_of_answers):
   answers = []
   for question_tfidf in questions_tfidf:
     sims = sorted(enumerate(index_tfidf[question_tfidf]), key=lambda item: -item[1])[:number_of_answers]
-    possible_answers = [{"answer":data.loc[sim[0]].get("answer"),"score":round(sim[1],2)} for sim in sims]  
+    possible_answers = [{"answer":data.loc[sim[0]],"score":round(sim[1],2)} for sim in sims]  
     answers.append({"question":questions[i],"answers":possible_answers})
     i=i+1
       

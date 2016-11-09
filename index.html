@@ -66,16 +66,21 @@
 						{% if (choice.get("score") < 0.3) %}
 							<td align="center">(minimum score not met)</td>
 						{% else %}
-							<td>{{choice.get("answer")}}</td>
+							<td>{{choice.get("answer").get("answer")}}</td>
 						{% endif %}						
 					{% endfor %}
 				</tr>
 				
 				<!-- [Click to Expand Details] -->
 				<tr class="hidden">
-					<td><div class="animate"></div></td>
+					<td><i>Answer Details</i></td>
 					{% for choice in answer.get("answers") %}
-							<td><div class="animate">score: {{choice.get("score")}}</div></td>
+							<td>
+								<b>Score:</b> {{choice.get("score")}}<br>
+								<b>Origin:</b> {{choice.get("answer").get("origin")}}<br>
+								<b>Date:</b> {{choice.get("answer").get("date")}}<br>
+								<b>Question:</b><br> {{choice.get("answer").get("question")}}
+							</td>
 					{% endfor %}
 					</div>
 				</tr>
