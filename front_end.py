@@ -6,7 +6,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-NUMBER_OF_ANSWERS = 3 #number of answer choices to return
+NUMBER_OF_ANSWERS = 2 #number of answer choices to return
 MIN_SIMILARITY = 0.3 #discard answers with lower sim score
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
