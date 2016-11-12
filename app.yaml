@@ -1,0 +1,7 @@
+runtime: python
+vm: true
+entrypoint: gunicorn -b :$PORT front_end:app
+resources:
+  cpu: 2
+  memory_gb: 4
+  disk_size_gb: 10

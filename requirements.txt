@@ -1,0 +1,8 @@
+Flask==0.11.1
+gunicorn==19.6.0
+nltk==3.2.1
+gensim==0.13.3
+pandas==0.19.1
+WebOb==1.6.2
+webapp2==2.5.2
+Paste==2.0.3

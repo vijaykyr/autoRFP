@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+	<head>
+		<style>
+		table {
+		    border-collapse: collapse;
+		    width: 100%;
+				max-width:1200px;
+				min-width: 400px;
+		}
+
+		th, td {
+		    padding: 8px;
+		    text-align: left;
+		    border-bottom: 1px solid #ddd;
+		}
+
+		tr:nth-child(4n) {background-color: #f2f2f2}
+		tr:nth-child(4n+1) {background-color: #f2f2f2}
+
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script>
+			$(function() {
+			    $(".hidden").hide();
+			    $("tr").click(function() {
+			        var $target = $(event.target);
+			        if ($target.closest("tr").hasClass("answer")) {
+			            $target.closest("tr").next().slideToggle(0);
+			        }                  
+			    });
+			});
+		</script>
+	</head>
+  
+	<body>
+			<!-- [Questions] -->
+      <form action="/" method="post">
+        <textarea name="questions"  rows="10" cols ="100"
+					autofocus 
+					placeholder="Enter question(s). One per line.">{{questions}}</textarea>
+				<div>
+        <input type="submit" value="Get Answer(s)">
+      </form>
+
+      <!-- [Main Table] -->
+			<div style="overflow-x:auto;">
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			{% if answers %}
+				{% set count = 0 %}
+				<tr>
+					<th>Question</th>
+					{% for choice in answers[0].get("answers") %}
+						{% set count = count + 1 %}
+						<th>Answer {{count}}</th>
+					{% endfor %}
+				</tr>
+			{% endif %}
+			
+			<!-- [Answers] -->
+      {% for answer in answers %}
+        <tr class="answer">
+					<td>{{answer.get("question")}}</td>
+					{% for choice in answer.get("answers") %}
+						{% if (choice.get("score") < 0.3) %}
+							<td align="center">(minimum score not met)</td>
+						{% else %}
+							<td>{{choice.get("answer").get("answer")}}</td>
+						{% endif %}						
+					{% endfor %}
+				</tr>
+				
+				<!-- [Click to Expand Details] -->
+				<tr class="hidden">
+					<td><i>Answer Details</i></td>
+					{% for choice in answer.get("answers") %}
+							<td>
+								<b>Score:</b> {{choice.get("score")}}<br>
+								<b>Origin:</b> {{choice.get("answer").get("origin")}}<br>
+								<b>Date:</b> {{choice.get("answer").get("date")}}<br>
+								<b>Question:</b><br> {{choice.get("answer").get("question")}}
+							</td>
+					{% endfor %}
+					</div>
+				</tr>
+			{% endfor %}
+			</table>
+			</div>
+  </body>
+</html>
+{% endautoescape %}
