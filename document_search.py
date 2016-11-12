@@ -60,16 +60,23 @@ def get_answers(questions,number_of_answers):
   questions_tfidf = [tfidf[question_bow] for question_bow in questions_bow]
 
   i=0
-  
   answers = []
   for question_tfidf in questions_tfidf:
-    #similarity_scores = index_tfidf[question_tfidf]
-    #freshness_score = [get_freshness_score(item.get("date")) for item in data]
-    sims = sorted(enumerate(index_tfidf[question_tfidf]), key=lambda item: -item[1])[:number_of_answers]
+    similarity_scores = index_tfidf[question_tfidf]
+    overall_scores = []
+    #ToDo: How much more efficient would this calculation be with numpy arrays? Test on 100K using timeit
+    for j in range(len(similarity_scores)):
+        #Overall score is weighted average of compononent scores
+        overall_scores.append((2./3)*similarity_scores[j] + (1./3)*data.loc[j].get("freshness_score"))
+    
+    #Sort and extract top scores    
+    top_sims = sorted(enumerate(overall_scores), key=lambda item: -item[1])[:number_of_answers]
+    
     possible_answers = [{
       "answer":data.loc[sim[0]],
-      "similarity_score":round(sim[1],2),
-    } for sim in sims]  
+      "similarity_score":round(similarity_scores[sim[0]],2),
+      "overall_score":round(sim[1],2)
+    } for sim in top_sims]  
     answers.append({"question":questions[i],"answers":possible_answers})
     i=i+1
       
