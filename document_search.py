@@ -12,6 +12,7 @@ from gensim import corpora
 #Define Class Constants
 FILE_NAME = 'RFX01-10172016.csv'
 STEMMER = nltk.stem.snowball.SnowballStemmer("english")
+#ToDo: Consider moving stopwords to external file 
 STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves', u'you', u'your', u'yours',
  u'yourself', u'yourselves', u'he', u'him', u'his', u'himself', u'she', u'her', u'hers', u'herself', u'it', u'its',
  u'itself', u'they', u'them', u'their', u'theirs', u'themselves', u'what', u'which', u'who', u'whom', u'this', u'that',
