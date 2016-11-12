@@ -53,7 +53,8 @@ def get_freshness_score(date):
   return round((MAX_DAYS-days_past)/MAX_DAYS,2)
   
   
-def get_answers(questions,number_of_answers):
+def get_answers(questions,number_of_answers,min_sim):
+  #Calculate TF-IDF vector representation(s) of input question(s)
   questions = filter(None,questions) #remove empty lines
   questions_normalized = [normalize(question) for question in questions]
   questions_bow = [dictionary.doc2bow(question_normalized) for question_normalized in questions_normalized]
@@ -62,21 +63,21 @@ def get_answers(questions,number_of_answers):
   i=0
   answers = []
   for question_tfidf in questions_tfidf:
-    similarity_scores = index_tfidf[question_tfidf]
-    overall_scores = []
-    #ToDo: How much more efficient would this calculation be with numpy arrays? Test on 100K using timeit
-    for j in range(len(similarity_scores)):
-        #Overall score is weighted average of compononent scores
-        overall_scores.append((2./3)*similarity_scores[j] + (1./3)*data.loc[j].get("freshness_score"))
-    
+    #generate list of tuples of form (answer index, similartity score)
+    scores = list(enumerate(index_tfidf[question_tfidf]))
+    #filter out answers not meeting minimum similarity score
+    scores = [elem for elem in scores if elem[1] >= min_sim]
+    #calcuate overall score and add to tuple: (answer index, similartity score, overall score)
+    scores = [score + ((2./3)*score[1] + (1./3)*data.loc[score[0]].get("freshness_score"),) for score in scores]
+        
     #Sort and extract top scores    
-    top_sims = sorted(enumerate(overall_scores), key=lambda item: -item[1])[:number_of_answers]
+    top_scores = sorted(scores, key=lambda item: -item[2])[:number_of_answers]
     
     possible_answers = [{
-      "answer":data.loc[sim[0]],
-      "similarity_score":round(similarity_scores[sim[0]],2),
-      "overall_score":round(sim[1],2)
-    } for sim in top_sims]  
+      "answer":data.loc[score[0]],
+      "similarity_score":round(score[1],2),
+      "overall_score":round(score[2],2)
+    } for score in top_scores]  
     answers.append({"question":questions[i],"answers":possible_answers})
     i=i+1
       
