@@ -63,7 +63,7 @@
         <tr class="answer">
 					<td>{{answer.get("question")}}</td>
 					{% for choice in answer.get("answers") %}
-						{% if (choice.get("score") < 0.3) %}
+						{% if (choice.get("similarity_score") < 0.3) %}
 							<td align="center">(minimum score not met)</td>
 						{% else %}
 							<td>{{choice.get("answer").get("answer")}}</td>
@@ -76,7 +76,8 @@
 					<td><i>Answer Details</i></td>
 					{% for choice in answer.get("answers") %}
 							<td>
-								<b>Score:</b> {{choice.get("score")}}<br>
+								<b>Similarity Score:</b> {{choice.get("similarity_score")}}<br>
+								<b>Freshness Score:</b> {{choice.get("freshness_score")}}<br>
 								<b>Origin:</b> {{choice.get("answer").get("origin")}}<br>
 								<b>Date:</b> {{choice.get("answer").get("date")}}<br>
 								<b>Question:</b><br> {{choice.get("answer").get("question")}}

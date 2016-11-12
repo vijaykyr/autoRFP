@@ -4,6 +4,7 @@
 import pandas as pd
 import nltk
 import string
+from datetime import datetime
 from gensim import similarities
 from gensim import models
 from gensim import corpora
@@ -36,6 +37,22 @@ def normalize(text):
     text = [STEMMER.stem(word) for word in text]
     return text
 
+#Score from 0 to 1 
+#  0: >= MAX_DAYS
+#  1: today
+#Assumption: date is passed as string in format "YYYY-MM-DD"
+def get_freshness_score(date):
+  MAX_DAYS = 365.0 
+  #Convert string to date
+  date = datetime.strptime(date , '%Y-%m-%d').date()
+  #Calculate from since today
+  days_past = (datetime.now().date() - date).days
+  #if the date is in the future assume it's corrupt, set to max
+  if days_past < 0 or days_past > MAX_DAYS: days_past = MAX_DAYS
+  #scale from 0 to 1, round and return
+  return round((MAX_DAYS-days_past)/MAX_DAYS,2)
+  
+  
 def get_answers(questions,number_of_answers):
   questions = filter(None,questions) #remove empty lines
   questions_normalized = [normalize(question) for question in questions]
@@ -47,7 +64,11 @@ def get_answers(questions,number_of_answers):
   answers = []
   for question_tfidf in questions_tfidf:
     sims = sorted(enumerate(index_tfidf[question_tfidf]), key=lambda item: -item[1])[:number_of_answers]
-    possible_answers = [{"answer":data.loc[sim[0]],"score":round(sim[1],2)} for sim in sims]  
+    possible_answers = [{
+      "answer":data.loc[sim[0]],
+      "similarity_score":round(sim[1],2),
+      "freshness_score":get_freshness_score(data.loc[sim[0]].get("date"))
+    } for sim in sims]  
     answers.append({"question":questions[i],"answers":possible_answers})
     i=i+1
       
