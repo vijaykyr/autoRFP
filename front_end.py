@@ -23,8 +23,6 @@ class MainPage(webapp2.RequestHandler):
     
     def post(self):
         questions = self.request.get('questions').splitlines()
-        #print(type(questions))
-        #print(questions)
         
         template_values = {
             'questions': self.request.get('questions'),
@@ -33,10 +31,6 @@ class MainPage(webapp2.RequestHandler):
         
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
-        
-        #print(answers)
-        #query_params = {'question': question}
-        #self.redirect('/?' + urllib.urlencode(query_params))
 
 #Define Routes
 app = webapp2.WSGIApplication([

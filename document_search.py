@@ -63,11 +63,12 @@ def get_answers(questions,number_of_answers):
   
   answers = []
   for question_tfidf in questions_tfidf:
+    #similarity_scores = index_tfidf[question_tfidf]
+    #freshness_score = [get_freshness_score(item.get("date")) for item in data]
     sims = sorted(enumerate(index_tfidf[question_tfidf]), key=lambda item: -item[1])[:number_of_answers]
     possible_answers = [{
       "answer":data.loc[sim[0]],
       "similarity_score":round(sim[1],2),
-      "freshness_score":get_freshness_score(data.loc[sim[0]].get("date"))
     } for sim in sims]  
     answers.append({"question":questions[i],"answers":possible_answers})
     i=i+1
@@ -79,6 +80,10 @@ def get_answers(questions,number_of_answers):
 #Load data
 #ToDO: Load this from cloud SQL
 data = pd.read_csv(FILE_NAME)
+#add freshness score
+data['freshness_score']=data.apply(lambda row: get_freshness_score(row['date']), axis=1)
+
+#Extract questions column as list
 documents = data['question'].tolist()
 
 #Normalize
