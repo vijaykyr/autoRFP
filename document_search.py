@@ -28,6 +28,8 @@ STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves'
  u'isn', u'ma', u'mightn', u'mustn', u'needn', u'shan', u'shouldn', u'wasn', u'weren', u'won', u'wouldn']
 
 #Functions
+
+#Normalize text: lowercase, strip punctation, remove stopwords, stem
 def normalize(text):
     if(type(text) == unicode): text = text.encode('ascii','ignore') 
     #the translate function doesn't work on unicode
@@ -97,10 +99,8 @@ documents = data['question'].tolist()
 #Normalize
 corpus = [normalize(text) for text in documents]
 
-#Build corpus dictionary
+#Generate tf-idf model based on corpus
 dictionary = corpora.Dictionary(corpus)
-
-#Vectorize
 corpus_bow = [dictionary.doc2bow(text) for text in corpus]
 tfidf = models.TfidfModel(corpus_bow)
 corpus_tfidf = tfidf[corpus_bow]
