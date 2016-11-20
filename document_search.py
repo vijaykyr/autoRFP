@@ -92,43 +92,41 @@ def get_answers(questions,number_of_answers,min_sim):
       
   return answers
 
-#Download Corpus, normalize, and vectorize
-def initialize():          
-  global dictionary, tfidf, index_tfidf, data
-  #Load data from CSV
-  #ToDO: Load this from cloud SQL
-  data = pd.read_csv(FILE_NAME)
-
-  #Load data from Cloud SQL
-  """
+#Fetch corpus from Cloud SQL database
+def get_corpus():
+  ####START Load Data from Cloud SQL####
+  
   #establish connection
   if os.environ.get('GAE_INSTANCE'): #app engine
       cnx = mysql.connector.connect(user='root', password='admin',
-                                    database='Responses', 
+                                    database='rfi', 
                                     unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
   else: #local
       cnx = mysql.connector.connect(user='root', password='admin',
-                                    host='127.0.0.1', database='Responses')
-
+                                    host='127.0.0.1', database='rfi')
 
   #cursor object required for queries
   cursor = cnx.cursor()
 
-  #store SQL query
-  query = ("SELECT question,answer,origin,date FROM RFX01")
-  #add origin, remove limit
+  #SQL query
+  query = ("SELECT question,answer,origin,date FROM rfi")
 
   #execute query, results are stored in cursor object
   cursor.execute(query)
 
-  #Store results in memory as list of tuples. where each tuple is a row
-  rows = cursor.fetchall()
-
-  #Construct pandas dataframe
-  data = pd.DataFrame.from_records(rows, columns = ("question","answer","origin","date"))
-  """
-
-
+  #List of tuples. where each tuple is a row
+  return cursor.fetchall()
+  
+#Download Corpus, normalize, and vectorize
+def initialize():          
+  global dictionary, tfidf, index_tfidf, data
+  
+  #Fetch data
+  data = get_corpus()
+  
+  #Construct pandas dataframe from data
+  data = pd.DataFrame.from_records(data, columns = ("question","answer","origin","date"))
+  
   #add freshness score
   data['freshness_score']=data.apply(lambda row: get_freshness_score(row['date']), axis=1)
 
