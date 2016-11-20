@@ -28,6 +28,12 @@ STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves'
  u'd', u'll', u'm', u'o', u're', u've', u'y', u'ain', u'aren', u'couldn', u'didn', u'doesn', u'hadn', u'hasn', u'haven',
  u'isn', u'ma', u'mightn', u'mustn', u'needn', u'shan', u'shouldn', u'wasn', u'weren', u'won', u'wouldn']
 
+#GLOBALS
+data = [] #Pandas DataFrame containing corpus
+dictionary = [] #List of unique words in the corpus
+tfidf = [] #Frequency of each word in the corpus
+index_tfidf = [] #Index for fast tfidf comparisons
+
 #Functions
 
 #Normalize text: lowercase, strip punctation, remove stopwords, stem
@@ -86,59 +92,67 @@ def get_answers(questions,number_of_answers,min_sim):
       
   return answers
 
-#INITIALIZE CLASS
-          
-#Load data from CSV
-#ToDO: Load this from cloud SQL
-data = pd.read_csv(FILE_NAME)
+#Download Corpus, normalize, and vectorize
+def initialize():          
+  global dictionary, tfidf, index_tfidf, data
+  #Load data from CSV
+  #ToDO: Load this from cloud SQL
+  data = pd.read_csv(FILE_NAME)
 
-#Load data from Cloud SQL
-"""
-#establish connection
-if os.environ.get('GAE_INSTANCE'): #app engine
-    cnx = mysql.connector.connect(user='root', password='admin',
-                                  database='Responses', 
-                                  unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
-else: #local
-    cnx = mysql.connector.connect(user='root', password='admin',
-                                  host='127.0.0.1', database='Responses')
-
-
-#cursor object required for queries
-cursor = cnx.cursor()
-
-#store SQL query
-query = ("SELECT question,answer,origin,date FROM RFX01")
-#add origin, remove limit
-
-#execute query, results are stored in cursor object
-cursor.execute(query)
-
-#Store results in memory as list of tuples. where each tuple is a row
-rows = cursor.fetchall()
-
-#Construct pandas dataframe
-data = pd.DataFrame.from_records(rows, columns = ("question","answer","origin","date"))
-"""
+  #Load data from Cloud SQL
+  """
+  #establish connection
+  if os.environ.get('GAE_INSTANCE'): #app engine
+      cnx = mysql.connector.connect(user='root', password='admin',
+                                    database='Responses', 
+                                    unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
+  else: #local
+      cnx = mysql.connector.connect(user='root', password='admin',
+                                    host='127.0.0.1', database='Responses')
 
 
-#add freshness score
-data['freshness_score']=data.apply(lambda row: get_freshness_score(row['date']), axis=1)
+  #cursor object required for queries
+  cursor = cnx.cursor()
 
-#Extract questions column as list
-documents = data['question'].tolist()
+  #store SQL query
+  query = ("SELECT question,answer,origin,date FROM RFX01")
+  #add origin, remove limit
 
-#Normalize
-corpus = [normalize(text) for text in documents]
+  #execute query, results are stored in cursor object
+  cursor.execute(query)
 
-#Generate tf-idf model based on corpus
-dictionary = corpora.Dictionary(corpus)
-corpus_bow = [dictionary.doc2bow(text) for text in corpus]
-tfidf = models.TfidfModel(corpus_bow)
-corpus_tfidf = tfidf[corpus_bow]
+  #Store results in memory as list of tuples. where each tuple is a row
+  rows = cursor.fetchall()
 
-#Generate similiarity index
-index_tfidf = similarities.MatrixSimilarity(corpus_tfidf)
+  #Construct pandas dataframe
+  data = pd.DataFrame.from_records(rows, columns = ("question","answer","origin","date"))
+  """
 
-print("TFIDF Index created!")
 
+  #add freshness score
+  data['freshness_score']=data.apply(lambda row: get_freshness_score(row['date']), axis=1)
+
+  #Extract questions column as list
+  documents = data['question'].tolist()
+
+  #Normalize
+  corpus = [normalize(text) for text in documents]
+
+  #Generate tf-idf model based on corpus
+  dictionary = corpora.Dictionary(corpus)
+  corpus_bow = [dictionary.doc2bow(text) for text in corpus]
+  tfidf = models.TfidfModel(corpus_bow)
+  corpus_tfidf = tfidf[corpus_bow]
+
+  #Generate similiarity index
+  index_tfidf = similarities.MatrixSimilarity(corpus_tfidf)
+
+  print("TFIDF Index created!")
+  
+  
+####################
+##INITIALIZE CLASS##
+####################
+#The code below will triggered during the import statement in front_end.py
+
+initialize()
