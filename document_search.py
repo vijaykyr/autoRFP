@@ -1,6 +1,7 @@
 #Class - instantiate with csv of Q and As
 #Method - given Q output A
 
+import os
 import pandas as pd
 import nltk
 import string
@@ -8,7 +9,7 @@ from datetime import datetime
 from gensim import similarities
 from gensim import models
 from gensim import corpora
-
+import mysql.connector
 
 #Define Class Constants
 FILE_NAME = 'RFX01-10172016.csv'
@@ -87,9 +88,40 @@ def get_answers(questions,number_of_answers,min_sim):
 
 #INITIALIZE CLASS
           
-#Load data
+#Load data from CSV
 #ToDO: Load this from cloud SQL
 data = pd.read_csv(FILE_NAME)
+
+#Load data from Cloud SQL
+"""
+#establish connection
+if os.environ.get('GAE_INSTANCE'): #app engine
+    cnx = mysql.connector.connect(user='root', password='admin',
+                                  database='Responses', 
+                                  unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
+else: #local
+    cnx = mysql.connector.connect(user='root', password='admin',
+                                  host='127.0.0.1', database='Responses')
+
+
+#cursor object required for queries
+cursor = cnx.cursor()
+
+#store SQL query
+query = ("SELECT question,answer,origin,date FROM RFX01")
+#add origin, remove limit
+
+#execute query, results are stored in cursor object
+cursor.execute(query)
+
+#Store results in memory as list of tuples. where each tuple is a row
+rows = cursor.fetchall()
+
+#Construct pandas dataframe
+data = pd.DataFrame.from_records(rows, columns = ("question","answer","origin","date"))
+"""
+
+
 #add freshness score
 data['freshness_score']=data.apply(lambda row: get_freshness_score(row['date']), axis=1)
 
