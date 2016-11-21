@@ -7,6 +7,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 NUMBER_OF_ANSWERS = 2 #number of answer choices to return
+MIN_SIMILARITY = 0.3 #discard answers with lower sim score
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
@@ -23,20 +24,15 @@ class MainPage(webapp2.RequestHandler):
     
     def post(self):
         questions = self.request.get('questions').splitlines()
-        #print(type(questions))
-        #print(questions)
         
         template_values = {
             'questions': self.request.get('questions'),
-            'answers': get_answers(questions,NUMBER_OF_ANSWERS),
+            'answers': get_answers(questions,NUMBER_OF_ANSWERS,MIN_SIMILARITY),
+            'number_of_answers': NUMBER_OF_ANSWERS
         }
         
         template = JINJA_ENVIRONMENT.get_template('index.html')
         self.response.write(template.render(template_values))
-        
-        #print(answers)
-        #query_params = {'question': question}
-        #self.redirect('/?' + urllib.urlencode(query_params))
 
 #Define Routes
 app = webapp2.WSGIApplication([

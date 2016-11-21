@@ -48,12 +48,10 @@
 			<div style="overflow-x:auto;">
 			<table width="100%" border="0" cellspacing="0" cellpadding="0">
 			{% if answers %}
-				{% set count = 0 %}
 				<tr>
 					<th>Question</th>
-					{% for choice in answers[0].get("answers") %}
-						{% set count = count + 1 %}
-						<th>Answer {{count}}</th>
+					{% for i in range(number_of_answers) %}
+						<th>Answer {{i+1}}</th>
 					{% endfor %}
 				</tr>
 			{% endif %}
@@ -62,11 +60,11 @@
       {% for answer in answers %}
         <tr class="answer">
 					<td>{{answer.get("question")}}</td>
-					{% for choice in answer.get("answers") %}
-						{% if (choice.get("score") < 0.3) %}
-							<td align="center">(minimum score not met)</td>
+					{% for i in range(number_of_answers) %}
+						{% if (answer.get("answers")[i]) %}
+							<td>{{answer.get("answers")[i].get("answer").get("answer")}}</td>
 						{% else %}
-							<td>{{choice.get("answer").get("answer")}}</td>
+							<td>(minimum score not met)</td>
 						{% endif %}						
 					{% endfor %}
 				</tr>
@@ -74,13 +72,19 @@
 				<!-- [Click to Expand Details] -->
 				<tr class="hidden">
 					<td><i>Answer Details</i></td>
-					{% for choice in answer.get("answers") %}
-							<td>
-								<b>Score:</b> {{choice.get("score")}}<br>
+					{% for i in range(number_of_answers) %}
+						{% if (answer.get("answers")[i]) %}
+						{% set choice = answer.get("answers")[i] %}
+							<td style="vertical-align:top">
+								<b>Overall Score:</b> {{choice.get("overall_score")}}<br>
+								<b>Similarity Score:</b> {{choice.get("similarity_score")}}<br>
 								<b>Origin:</b> {{choice.get("answer").get("origin")}}<br>
 								<b>Date:</b> {{choice.get("answer").get("date")}}<br>
 								<b>Question:</b><br> {{choice.get("answer").get("question")}}
 							</td>
+						{% else %}
+							<td>n/a</td>
+						{% endif %}
 					{% endfor %}
 					</div>
 				</tr>

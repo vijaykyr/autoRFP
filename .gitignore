@@ -1,2 +1,4 @@
 /virtualenv/*
+/tests/*
 *.csv
+*.pyc

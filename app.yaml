@@ -1,7 +1,12 @@
 runtime: python
-vm: true
+env: flex
+service: default
 entrypoint: gunicorn -b :$PORT front_end:app
 resources:
   cpu: 2
   memory_gb: 4
   disk_size_gb: 10
+env_variables:
+    SQL_CONNECTION_STRING: "/cloudsql/vijays-sandbox-2:us-central1:rfi-dev"
+beta_settings:
+      cloud_sql_instances: "vijays-sandbox-2:us-central1:rfi-dev"
