@@ -39,9 +39,18 @@ index_tfidf_G = [] #Index for fast tfidf comparisons
 #Thread to periodically check Cloud SQL for updates
 class updateThread (threading.Thread):
   def run(self):
+    last_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
+          WHERE table_schema='rfi' AND table_name='rfi'""")
+
     while(True):
-      sleep(1)
-      initialize()
+      sleep(3600) #Check table for changes every hour
+      
+      current_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
+          WHERE table_schema='rfi' AND table_name='rfi'""")
+      
+      if current_update_time != last_update_time:
+        last_update_time = current_update_time
+        initialize()
 
 #Functions
 
@@ -109,9 +118,9 @@ def get_answers(questions,number_of_answers,min_sim):
   return answers
 
 #Fetch corpus from Cloud SQL database
-def get_corpus():
+def sql_query(query):
   ####START Load Data from Cloud SQL####
-  
+
   #establish connection
   if os.environ.get('GAE_INSTANCE'): #app engine
       cnx = mysql.connector.connect(user='root', password='admin',
@@ -124,12 +133,10 @@ def get_corpus():
   #cursor object required for queries
   cursor = cnx.cursor()
 
-  #SQL query
-  query = ("SELECT question,answer,origin,date FROM rfi")
-
   #execute query, results are stored in cursor object
-  cursor.execute(query)
-
+  cursor.execute((query))
+  cnx.close()
+  
   #List of tuples. where each tuple is a row
   return cursor.fetchall()
   
@@ -138,8 +145,8 @@ def initialize():
   global dictionary_G, tfidf_G, index_tfidf_G, data_G
   
   #Fetch data
-  data = get_corpus()
-  
+  data = sql_query("SELECT question,answer,origin,date FROM rfi")
+
   #Construct pandas dataframe from data
   data = pd.DataFrame.from_records(data, columns = ("question","answer","origin","date"))
   
