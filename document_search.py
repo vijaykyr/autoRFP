@@ -2,6 +2,7 @@
 #Method - given Q output A
 
 import os
+import sys
 import threading
 from time import sleep
 import pandas as pd
@@ -48,7 +49,8 @@ class updateThread (threading.Thread):
       current_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
           WHERE table_schema='rfi' AND table_name='rfi'""")
       
-      if current_update_time != last_update_time:
+      #if query returned and table update time has changed
+      if current_update_time and (current_update_time != last_update_time):
         last_update_time = current_update_time
         initialize()
 
@@ -122,23 +124,26 @@ def sql_query(query):
   ####START Load Data from Cloud SQL####
 
   #establish connection
-  if os.environ.get('GAE_INSTANCE'): #app engine
-      cnx = mysql.connector.connect(user='root', password='admin',
-                                    database='rfi', 
-                                    unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
-  else: #local
-      cnx = mysql.connector.connect(user='root', password='admin',
-                                    host='127.0.0.1', database='rfi')
+  try:
+    if os.environ.get('GAE_INSTANCE'): #app engine
+        cnx = mysql.connector.connect(user='root', password='admin',
+                                      database='rfi', 
+                                      unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
+    else: #local
+        cnx = mysql.connector.connect(user='root', password='admin',
+                                      host='127.0.0.1', database='rfi')
 
-  #cursor object required for queries
-  cursor = cnx.cursor()
+    #cursor object required for queries
+    cursor = cnx.cursor()
 
-  #execute query, results are stored in cursor object
-  cursor.execute((query))
-  cnx.close()
+    #execute query, results are stored in cursor object
+    cursor.execute((query))
+    cnx.close()
   
-  #List of tuples. where each tuple is a row
-  return cursor.fetchall()
+    #List of tuples. where each tuple is a row
+    return cursor.fetchall()
+  except:
+    sys.stderr.write("ERROR: Failed to connect to mySQL. Check that database is up.\n")
   
 #Download Corpus, normalize, and vectorize
 def initialize():          
@@ -146,10 +151,10 @@ def initialize():
   
   #Fetch data
   data = sql_query("SELECT question,answer,origin,date FROM rfi")
-
+  
   #Construct pandas dataframe from data
   data = pd.DataFrame.from_records(data, columns = ("question","answer","origin","date"))
-  
+
   #add freshness score
   data['freshness_score']=data.apply(lambda row: get_freshness_score(row['date']), axis=1)
 
@@ -167,14 +172,14 @@ def initialize():
 
   #Generate similiarity index
   index_tfidf = similarities.MatrixSimilarity(corpus_tfidf)
-  
+
   #Set globals
   with lock:
     dictionary_G = dictionary
     tfidf_G = tfidf
     index_tfidf_G = index_tfidf
     data_G = data
-    
+  
   print("TFIDF Index created!")
   
   
