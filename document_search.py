@@ -2,6 +2,8 @@
 #Method - given Q output A
 
 import os
+import threading
+from time import sleep
 import pandas as pd
 import nltk
 import string
@@ -12,7 +14,6 @@ from gensim import corpora
 import mysql.connector
 
 #Define Class Constants
-FILE_NAME = 'RFX01-10172016.csv'
 STEMMER = nltk.stem.snowball.SnowballStemmer("english")
 #ToDo: Consider moving stopwords to external file 
 STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves', u'you', u'your', u'yours',
@@ -29,10 +30,27 @@ STOPWORDS = [u'i', u'me', u'my', u'myself', u'we', u'our', u'ours', u'ourselves'
  u'isn', u'ma', u'mightn', u'mustn', u'needn', u'shan', u'shouldn', u'wasn', u'weren', u'won', u'wouldn']
 
 #GLOBALS
-data = [] #Pandas DataFrame containing corpus
-dictionary = [] #List of unique words in the corpus
-tfidf = [] #Frequency of each word in the corpus
-index_tfidf = [] #Index for fast tfidf comparisons
+lock = threading.Lock() #Lock to update globals
+data_G = [] #Pandas DataFrame containing corpus
+dictionary_G = [] #List of unique words in the corpus
+tfidf_G = [] #Frequency of each word in the corpus
+index_tfidf_G = [] #Index for fast tfidf comparisons
+
+#Thread to periodically check Cloud SQL for updates
+class updateThread (threading.Thread):
+  def run(self):
+    last_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
+          WHERE table_schema='rfi' AND table_name='rfi'""")
+
+    while(True):
+      sleep(3600) #Check table for changes every hour
+      
+      current_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
+          WHERE table_schema='rfi' AND table_name='rfi'""")
+      
+      if current_update_time != last_update_time:
+        last_update_time = current_update_time
+        initialize()
 
 #Functions
 
@@ -63,6 +81,13 @@ def get_freshness_score(date):
   
   
 def get_answers(questions,number_of_answers,min_sim):
+  #Fetch globals
+  with lock:
+    dictionary = dictionary_G
+    tfidf = tfidf_G
+    index_tfidf = index_tfidf_G
+    data = data_G
+    
   #Calculate TF-IDF vector representation(s) of input question(s)
   questions = filter(None,questions) #remove empty lines
   questions_normalized = [normalize(question) for question in questions]
@@ -93,9 +118,9 @@ def get_answers(questions,number_of_answers,min_sim):
   return answers
 
 #Fetch corpus from Cloud SQL database
-def get_corpus():
+def sql_query(query):
   ####START Load Data from Cloud SQL####
-  
+
   #establish connection
   if os.environ.get('GAE_INSTANCE'): #app engine
       cnx = mysql.connector.connect(user='root', password='admin',
@@ -108,22 +133,20 @@ def get_corpus():
   #cursor object required for queries
   cursor = cnx.cursor()
 
-  #SQL query
-  query = ("SELECT question,answer,origin,date FROM rfi")
-
   #execute query, results are stored in cursor object
-  cursor.execute(query)
-
+  cursor.execute((query))
+  cnx.close()
+  
   #List of tuples. where each tuple is a row
   return cursor.fetchall()
   
 #Download Corpus, normalize, and vectorize
 def initialize():          
-  global dictionary, tfidf, index_tfidf, data
+  global dictionary_G, tfidf_G, index_tfidf_G, data_G
   
   #Fetch data
-  data = get_corpus()
-  
+  data = sql_query("SELECT question,answer,origin,date FROM rfi")
+
   #Construct pandas dataframe from data
   data = pd.DataFrame.from_records(data, columns = ("question","answer","origin","date"))
   
@@ -144,7 +167,14 @@ def initialize():
 
   #Generate similiarity index
   index_tfidf = similarities.MatrixSimilarity(corpus_tfidf)
-
+  
+  #Set globals
+  with lock:
+    dictionary_G = dictionary
+    tfidf_G = tfidf
+    index_tfidf_G = index_tfidf
+    data_G = data
+    
   print("TFIDF Index created!")
   
   
@@ -154,3 +184,5 @@ def initialize():
 #The code below will triggered during the import statement in front_end.py
 
 initialize()
+updateThread = updateThread()
+updateThread.start()
