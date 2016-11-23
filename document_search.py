@@ -44,7 +44,7 @@ class updateThread (threading.Thread):
           WHERE table_schema='rfi' AND table_name='rfi'""")
 
     while(True):
-      sleep(3600) #Check table for changes every hour
+      sleep(3600) #Check database for changes every hour
       
       current_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
           WHERE table_schema='rfi' AND table_name='rfi'""")

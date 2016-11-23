@@ -1,6 +1,6 @@
 runtime: python
 env: flex
-service: dev
+service: 
 entrypoint: gunicorn -b :$PORT front_end:app
 resources:
   cpu: 1
