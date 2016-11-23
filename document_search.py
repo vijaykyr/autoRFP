@@ -3,6 +3,7 @@
 
 import os
 import sys
+import config
 import threading
 from time import sleep
 import pandas as pd
@@ -41,13 +42,13 @@ index_tfidf_G = [] #Index for fast tfidf comparisons
 class updateThread (threading.Thread):
   def run(self):
     last_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
-          WHERE table_schema='rfi' AND table_name='rfi'""")
+          WHERE table_schema='rfi' AND table_name='{}'""".format(config.MYSQL_TABLE))
 
     while(True):
       sleep(3600) #Check database for changes every hour
       
       current_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
-          WHERE table_schema='rfi' AND table_name='rfi'""")
+          WHERE table_schema='rfi' AND table_name='{}'""".format(config.MYSQL_TABLE))
       
       #if query returned and table update time has changed
       if current_update_time and (current_update_time != last_update_time):
@@ -126,12 +127,12 @@ def sql_query(query):
   #establish connection
   try:
     if os.environ.get('GAE_INSTANCE'): #app engine
-        cnx = mysql.connector.connect(user='root', password='admin',
-                                      database='rfi', 
+        cnx = mysql.connector.connect(user=config.MYSQL_USER, password=config.MYSQL_PASSWORD,
+                                      database=config.MYSQL_DATABASE, 
                                       unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
     else: #local
-        cnx = mysql.connector.connect(user='root', password='admin',
-                                      host='127.0.0.1', database='rfi')
+        cnx = mysql.connector.connect(user=config.MYSQL_USER, password=config.MYSQL_PASSWORD,
+                                      host=config.MYSQL_HOST, database=config.MYSQL_DATABASE)
 
     #cursor object required for queries
     cursor = cnx.cursor()
@@ -150,7 +151,7 @@ def initialize():
   global dictionary_G, tfidf_G, index_tfidf_G, data_G
   
   #Fetch data
-  data = sql_query("SELECT question,answer,origin,date FROM rfi")
+  data = sql_query("SELECT question,answer,origin,date FROM {}".format(config.MYSQL_TABLE))
   
   #Construct pandas dataframe from data
   data = pd.DataFrame.from_records(data, columns = ("question","answer","origin","date"))
