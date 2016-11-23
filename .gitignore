@@ -2,3 +2,5 @@
 /tests/*
 *.csv
 *.pyc
+
+config.py
