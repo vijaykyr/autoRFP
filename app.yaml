@@ -6,7 +6,15 @@ resources:
   cpu: 1
   memory_gb: 2
   disk_size_gb: 10
+automatic_scaling:
+  min_num_instances: 4
+  max_num_instances: 20
+  cool_down_period_sec: 120 
+  cpu_utilization:
+    target_utilization: 0.5
 env_variables:
-    SQL_CONNECTION_STRING: "/cloudsql/vijays-sandbox-2:us-central1:rfi-dev"
+  SQL_CONNECTION_STRING: "/cloudsql/hnacino-sandbox:us-central1:hnacino-2ndgen-mysql"
+  #SQL_CONNECTION_STRING: "/cloudsql/autorfp:us-central1:autorfp"
 beta_settings:
-      cloud_sql_instances: "vijays-sandbox-2:us-central1:rfi-dev"
+  cloud_sql_instances: "hnacino-sandbox:us-central1:hnacino-2ndgen-mysql"
+  #cloud_sql_instances: "autorfp:us-central1:autorfp"
