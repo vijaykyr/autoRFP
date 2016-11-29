@@ -42,18 +42,19 @@ index_tfidf_G = [] #Index for fast tfidf comparisons
 class updateThread (threading.Thread):
   def run(self):
     last_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
-          WHERE table_schema='rfi' AND table_name='{}'""".format(config.MYSQL_TABLE))
-
+          WHERE table_schema='{}' AND table_name='{}'""".format(config.MYSQL_DATABASE, config.MYSQL_TABLE))
+    
     while(True):
-      sleep(3600) #Check database for changes every hour
-      
+      sleep(3600) 
+      print("Checking Cloud SQL for updates.")
       current_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
-          WHERE table_schema='rfi' AND table_name='{}'""".format(config.MYSQL_TABLE))
-      
+          WHERE table_schema='{}' AND table_name='{}'""".format(config.MYSQL_DATABASE, config.MYSQL_TABLE))
       #if query returned and table update time has changed
       if current_update_time and (current_update_time != last_update_time):
         last_update_time = current_update_time
         initialize()
+        print("Index updated from Cloud SQL.")
+      elif current_update_time: print("No update from Cloud SQL needed.")
 
 #Functions
 
