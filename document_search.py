@@ -2,6 +2,8 @@
 #Method - given Q output A
 
 import os
+import sys
+import config
 import threading
 from time import sleep
 import pandas as pd
@@ -40,17 +42,19 @@ index_tfidf_G = [] #Index for fast tfidf comparisons
 class updateThread (threading.Thread):
   def run(self):
     last_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
-          WHERE table_schema='rfi' AND table_name='rfi'""")
-
+          WHERE table_schema='{}' AND table_name='{}'""".format(config.MYSQL_DATABASE, config.MYSQL_TABLE))
+    
     while(True):
-      sleep(3600) #Check table for changes every hour
-      
+      sleep(3600) 
+      print("Checking Cloud SQL for updates.")
       current_update_time = sql_query("""SELECT update_time FROM information_schema.tables 
-          WHERE table_schema='rfi' AND table_name='rfi'""")
-      
-      if current_update_time != last_update_time:
+          WHERE table_schema='{}' AND table_name='{}'""".format(config.MYSQL_DATABASE, config.MYSQL_TABLE))
+      #if query returned and table update time has changed
+      if current_update_time and (current_update_time != last_update_time):
         last_update_time = current_update_time
         initialize()
+        print("Index updated from Cloud SQL.")
+      elif current_update_time: print("No update from Cloud SQL needed.")
 
 #Functions
 
@@ -122,34 +126,37 @@ def sql_query(query):
   ####START Load Data from Cloud SQL####
 
   #establish connection
-  if os.environ.get('GAE_INSTANCE'): #app engine
-      cnx = mysql.connector.connect(user='root', password='admin',
-                                    database='rfi', 
-                                    unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
-  else: #local
-      cnx = mysql.connector.connect(user='root', password='admin',
-                                    host='127.0.0.1', database='rfi')
+  try:
+    if os.environ.get('GAE_INSTANCE'): #app engine
+        cnx = mysql.connector.connect(user=config.MYSQL_USER, password=config.MYSQL_PASSWORD,
+                                      database=config.MYSQL_DATABASE, 
+                                      unix_socket=os.environ.get('SQL_CONNECTION_STRING'))
+    else: #local
+        cnx = mysql.connector.connect(user=config.MYSQL_USER, password=config.MYSQL_PASSWORD,
+                                      host=config.MYSQL_HOST, database=config.MYSQL_DATABASE)
 
-  #cursor object required for queries
-  cursor = cnx.cursor()
+    #cursor object required for queries
+    cursor = cnx.cursor()
 
-  #execute query, results are stored in cursor object
-  cursor.execute((query))
-  cnx.close()
+    #execute query, results are stored in cursor object
+    cursor.execute((query))
+    cnx.close()
   
-  #List of tuples. where each tuple is a row
-  return cursor.fetchall()
+    #List of tuples. where each tuple is a row
+    return cursor.fetchall()
+  except:
+    sys.stderr.write("ERROR: Failed to connect to mySQL. Check that database is up.\n")
   
 #Download Corpus, normalize, and vectorize
 def initialize():          
   global dictionary_G, tfidf_G, index_tfidf_G, data_G
   
   #Fetch data
-  data = sql_query("SELECT question,answer,origin,date FROM rfi")
-
+  data = sql_query("SELECT question,answer,origin,date FROM {}".format(config.MYSQL_TABLE))
+  
   #Construct pandas dataframe from data
   data = pd.DataFrame.from_records(data, columns = ("question","answer","origin","date"))
-  
+
   #add freshness score
   data['freshness_score']=data.apply(lambda row: get_freshness_score(row['date']), axis=1)
 
@@ -167,14 +174,14 @@ def initialize():
 
   #Generate similiarity index
   index_tfidf = similarities.MatrixSimilarity(corpus_tfidf)
-  
+
   #Set globals
   with lock:
     dictionary_G = dictionary
     tfidf_G = tfidf
     index_tfidf_G = index_tfidf
     data_G = data
-    
+  
   print("TFIDF Index created!")
   
   
