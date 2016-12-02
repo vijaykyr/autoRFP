@@ -73,7 +73,7 @@ def normalize(text):
 #  1: today
 #Assumption: date is passed as string in format "YYYY-MM-DD"
 def get_freshness_score(date):
-  MAX_DAYS = 365.0 
+  MAX_DAYS = 730.0 #2years
   #Convert string to date
   date = datetime.strptime(date , '%Y-%m-%d').date()
   #Calculate from since today
